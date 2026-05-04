@@ -1,6 +1,5 @@
 # Dual Representation-based Light Field View Synthesis using Deformable Convolutional and Deep Residual Channel Attention Networks
 
-
 ## Abstract
 Light Field (LF) cameras simultaneously capture both intensity values and directional information of light rays in a single exposure, providing a unique perspective for computational photography and 3D geometry perception. However, existing LF cameras are constrained by sensor resolution, limiting their ability to capture high spatial and angular resolutions simultaneously. 
 
@@ -22,46 +21,67 @@ The **CFR module** refines the CLFVS output using a **DRCA network**, which empl
 
 The proposed method achieves strong performance on both **synthetic and real-world LF benchmarks**.
 
----
+## Project Structure
+## Model Selection
+To toggle between the **Synthetic** and **Real-World** models:
+* **Modify the `MODEL_NAME` variable** within the `run.sh` script.
+* **Note:** The environment defaults to the `synthetic_model` if no changes are made.
 
-# Project Structure
-
-### 1. pretrained_models/
-Contains pretrained models trained on **synthetic** and **real-world** datasets.
-
-### 2. Data/
-Contains training and testing datasets.
-
-### 3. Main_Model.py
-Implements the **main model architecture**, which fuses **Deformable Convolutional Networks** and the **Deep Residual Channel Attention (DRCA) Network**.  
-This file also reports the **total number of model parameters**.
-
-### 4. Deformable.py
-Implements the **Deformable Convolution layer** used for adaptive feature extraction.
-
-### 5. DeformNet.py
-Implements the **Spatial Feature Extraction (SPFE)** network for **depth-dependent LF view synthesis**.
-
-### 6. MIDeform.py
-Implements the **Angular Feature Extraction (AFE)** network for **non-depth-dependent LF view synthesis**.
-
-### 7. RCB.py
-Implements the **Deep Residual Channel Attention Network (DRCA)** including **Residual Channel Attention Blocks (RCABs)**.
-
-### 8. Opt.py
-Contains model configuration parameters and argument definitions.
-
-### 9. Training_model.py
-Script used for **training the model**.
-
-### 10. Test_Model.py
-Script used for **testing the pretrained model and generating results**.
+## Dataset Evaluation
+To perform evaluations on various datasets:
+* **Update the dataset identifiers** in `opt.py`.
+* **Verify Data Paths:** Ensure the corresponding data is present in the `/Data/[dataset_name]` directory.
 
 ---
 
-# Running the Code
 
-## Testing
+| Folder / File | Description |
+|---------------|-------------|
+| `pretrained_models/` | Pretrained LFVS models (synthetic and Real). |
+| `Data/` | Snythetic  and real-world datasets. |
+| `Main_Model.py` | Main model architecture combining deformable conv + DRCA. Reports model parameters. |
+| `Deformable.py` | Deformable convolution layer for adaptive feature extraction. |
+| `DeformNet.py` | SPFE network (depth-dependent LFVS). |
+| `MIDeform.py` | AFE network (non-depth-dependent LFVS). |
+| `RCB.py` | DRCA network with Residual Channel Attention Blocks. |
+| `Opt.py` | Model configuration parameters and argument definitions. |
+| `Training_model.py` | Training script for LFVS model. |
+| `Test_Model.py` | Testing script for generating synthesized views and quantitative results. |
+
+## 1. Model Parameters and Inference Time
+
+The total number of model parameters is reported automatically during the inference phase of the `synthetic_model`.
+Inference time is explicitly not reported due to inherent hardware disparities between local and cloud environments.
+
+## 2. Testing Pretrained Models
+
+Run the LFVS test script:
 
 ```bash
-python Test_Model.py
+python Test_Model.py 
+```
+
+### Outputs
+All persistent outputs are directed to the `/results` directory. Output files are organized by the specific `run_test_name` and its associated unique ID.
+
+* **`quant_results/`**: Contains quantitative evaluation files reporting **PSNR** and **SSIM** metrics for each tested Light Field Image (LFI).
+* **`SaveImg/`**: Stores all synthesized Light Field views generated during the inference process.
+
+## 3. For Retraining  
+Run the follow code
+```bash
+python Train_Model.py 
+```
+
+## 4. Angular Consistency
+ Change the run file configuration (as mentioned in run file for angular consistency) for angular consistency and then run that will generate anagular consistency output . 
+## 5. Reproducibility Notes
+ Keep batch size, patch size, and checkpoint paths consistent for reproducible metrics.
+
+> ### ⚠️ Note on Reproducibility and Performance
+> 
+> **Numerical Deviations:** Results may exhibit marginal deviations from previously published values due to **stochastic hardware behavior**, including GPU non-determinism, floating-point precision variance across architectures, and hardware-specific CUDA kernel optimizations. 
+>
+> **Patch-Based Inference:** To ensure execution stability across diverse hardware profiles and to mitigate **Out-of-Memory (OOM)** constraints, the inference pipeline has been optimized to perform **patch-based analysis**. 
+>
+> While these modifications ensure cross-platform compatibility, the resulting latency profiles and quantitative metrics (PSNR/SSIM) may vary slightly from benchmarks generated on high-memory, centralized clusters. These variations are expected and inherent to the transition between different high-performance computing environments.
